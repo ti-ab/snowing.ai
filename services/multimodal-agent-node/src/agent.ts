@@ -54,7 +54,7 @@ export default defineAgent({
 
     session.conversation.item.create(llm.ChatMessage.create({
       role: llm.ChatRole.ASSISTANT,
-      text: 'Comment puis-je vous aider ?',
+      text: 'How can i help you today?',
     }));
 
     session.response.create();
