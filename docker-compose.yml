@@ -61,12 +61,9 @@ services:
       - AGENT_SERVICE_URL=http://nginx/api/agents
       - USER_SERVICE_URL=http://nginx/api/users
 
-  livekit-agent:
+  lk-agent:
     build:
       context: ./services/multimodal-agent-node
-    container_name: livek-agent
-    env_file:
-      - ./services/multimodal-agent-node/.env.local
     ports:
       - "8084:8084"
 

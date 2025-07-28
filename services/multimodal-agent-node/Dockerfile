@@ -17,9 +17,4 @@ COPY . .
 # Construire le projet
 RUN pnpm build
 
-
-# Entrée via un shell script (voir plus bas)
-COPY start.sh .
-RUN chmod +x start.sh
-
-CMD ["./start.sh"]
+CMD ["sh", "-c", "node dist/agent.js $( [ \"$NODE_ENV\" = \"production\" ] && echo start || echo dev )"]
