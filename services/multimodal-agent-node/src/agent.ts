@@ -134,10 +134,37 @@ export default defineAgent({
     const participant = await ctx.waitForParticipant();
     console.log(`starting assistant example agent for ${participant.identity}`);
 
+    // 1. Importez vos contextes (ou définissez-les inline)
+    const contexts: Record<string,string> = {
+      'anglais_60': englishTeacherInstructions60Minutes,
+      'anglais_base': englishTeacherInstructions,
+      // ajoutez d’autres contextes si besoin
+    };
+
+    // Contexte par défaut
+    let currentContextKey = 'anglais_60';
+
+    // 2. Après la connexion, abonnez‑vous au canal de données (DataChannel)
+    ctx.onData(async (data) => {
+      try {
+        const msg = JSON.parse(Buffer.from(data.body).toString());
+        if (msg.type === 'setContext' && contexts[msg.context]) {
+          console.log(`Changement de contexte vers : ${msg.context}`);
+          currentContextKey = msg.context;
+        }
+      } catch (e) {
+        console.warn('Impossible de parser le message de context:', e);
+      }
+    });
+
+
+
+    // 3. Utilisation du contexte dynamique
+    const instructions = contexts[currentContextKey];
 
     const model = new openai.realtime.RealtimeModel({
       model: 'gpt-4o-mini-realtime-preview',
-      instructions: englishTeacherInstructions60Minutes,
+      instructions,             // <-- ici on injecte le prompt système dynamique
     });
 
 
