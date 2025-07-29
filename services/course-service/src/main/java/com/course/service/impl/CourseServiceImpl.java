@@ -175,7 +175,7 @@ public class CourseServiceImpl implements CourseService {
         static String bookPlan(String description) {
             return """
                     Can you generate a 200 pages training course book described as following: "%s".
-                    This book contains lessons to help AI teachers to teach things.
+                    This book contains lessons to help AI teachers agent to teach things orally.
                     The name for lessons is sections in the JSON.
                     Give me the book plan in 8 chapters. Each chapter must contain 4 subchapters. Each subchapter must contain 4 lessons.
                     mainTitle represents the main book title in at most 10 words. Authors must be completed only if it is mentioned in the book description.
