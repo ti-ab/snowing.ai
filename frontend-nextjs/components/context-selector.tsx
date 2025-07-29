@@ -2,7 +2,7 @@ import { DataPacket_Kind, Room } from 'livekit-client';
 
 // par exemple, dans un React component :
 function ContextSelector({ room }: { room: Room }) {
-  const [ctxKey, setCtxKey] = useState<'anglais_60'|'anglais_base'>('anglais_60');
+  const [ctxKey, setCtxKey] = useState<'anglais'|'python'>('anglais');
 
   const sendContext = (key: string) => {
     const payload = JSON.stringify({ type: 'setContext', context: key });
@@ -20,8 +20,8 @@ function ContextSelector({ room }: { room: Room }) {
         sendContext(e.target.value);
       }}
     >
-      <option value="anglais_60">Leçon d’anglais 60 min</option>
-      <option value="anglais_base">Anglais basique</option>
+      <option value="anglais">Leçon d’anglais 60</option>
+      <option value="python">Leçon de Python</option>
     </select>
   );
 }

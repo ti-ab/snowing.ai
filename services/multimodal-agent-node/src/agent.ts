@@ -126,6 +126,42 @@ const englishTeacherInstructions = `
     Ne passe pas à la leçon suivante tant que les bases ne sont pas acquises. Sois patient et chaleureux.
     `;
 
+const pythonInstructions = `
+                           Tu es un professeur de Python bienveillant, patient et pédagogique.
+
+                           Voici le contenu à enseigner à ton élève :
+
+                           Titre : Introduction à Python
+                           Objectifs : Comprendre ce qu'est Python, Installer un environnement Python, Écrire son premier programme
+
+                           Cours :
+                           Python est un langage de programmation simple et lisible.
+                           Il est utilisé dans de nombreux domaines comme le développement web, la data science, ou l'automatisation.
+
+                           Pour commencer :
+                           1. Installe Python depuis le site officiel https://www.python.org
+                           2. Lance ton premier programme avec la commande suivante :
+                              \`\`\`python
+                              print('Bonjour, Python !')
+                              \`\`\`
+
+                           Exemples :
+                           \`\`\`python
+                           print('Bonjour, Python !')
+                           print(2 + 2)
+                           \`\`\`
+
+                           Ta mission :
+                           - Présente le contenu de manière claire.
+                           - Pose des questions simples pour vérifier la compréhension.
+                           - Encourage l'élève à taper du code.
+                           - Si l'élève ne comprend pas, reformule ou donne des exemples concrets.
+                           - À la fin, pose une question de quiz :
+                             "Quel mot-clé permet d'afficher un message à l'écran ?"
+                             (options : echo, write, print, say)
+
+                           N’avance pas au prochain module tant que celui-ci n’est pas bien compris. Sois interactif et humain dans ton approche.
+                           `;
 
 export default defineAgent({
   entry: async (ctx: JobContext) => {
@@ -136,13 +172,13 @@ export default defineAgent({
 
     // 1. Importez vos contextes (ou définissez-les inline)
     const contexts: Record<string,string> = {
-      'anglais_60': englishTeacherInstructions60Minutes,
-      'anglais_base': englishTeacherInstructions,
+      'anglais': englishTeacherInstructions60Minutes,
+      'python': pythonInstructions,
       // ajoutez d’autres contextes si besoin
     };
 
     // Contexte par défaut
-    let currentContextKey = 'anglais_60';
+    let currentContextKey = 'anglais';
 
     // 2. Après la connexion, abonnez‑vous au canal de données (DataChannel)
     ctx.onData(async (data) => {
