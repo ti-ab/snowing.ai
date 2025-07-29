@@ -4,12 +4,13 @@
 FROM eclipse-temurin:21-jdk AS builder
 WORKDIR /app
 
+
 COPY . .
 
 ARG BUILD_PROFILE=prod
 ENV BUILD_PROFILE=$BUILD_PROFILE
 
-RUN ./mvnw clean package -DskipTests -P${BUILD_PROFILE} && \
+RUN chmod +x mvnw && ./mvnw clean package -DskipTests -P${BUILD_PROFILE} && \
     cp target/*.jar app.jar
 
 # ------------------------------

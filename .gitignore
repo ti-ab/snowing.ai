@@ -22,10 +22,6 @@ frontend-nextjs/coverage/
 
 **/*.local
 
-# Maven wrapper files (optional)
-**/mvnw
-**/mvnw.cmd
-
 # IntelliJ IDEA
 .idea/
 *.iml
