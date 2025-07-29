@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { DataPacket_Kind, Room } from 'livekit-client';
 
 // par exemple, dans un React component :
@@ -25,3 +26,5 @@ function ContextSelector({ room }: { room: Room }) {
     </select>
   );
 }
+
+export default ContextSelector;
