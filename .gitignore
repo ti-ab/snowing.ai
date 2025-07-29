@@ -1,0 +1,45 @@
+# Node / Next.js frontend
+frontend-nextjs/node_modules/
+frontend-nextjs/.next/
+frontend-nextjs/.env
+frontend-nextjs/.env.local
+frontend-nextjs/.env.*.local
+frontend-nextjs/yarn.lock
+frontend-nextjs/.turbo/
+frontend-nextjs/coverage/
+
+# Java / Spring Boot backend
+**/target/
+**/.classpath
+**/.project
+**/.settings/
+**/.mvn/
+**/logs/
+**/*.log
+**/*.tmp
+**/*.bak
+
+
+**/*.local
+
+# Maven wrapper files (optional)
+**/mvnw
+**/mvnw.cmd
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Docker
+*.log
+*.pid
+docker-compose.override.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+
+render.yaml
