@@ -175,7 +175,9 @@ public class CourseServiceImpl implements CourseService {
         static String bookPlan(String description) {
             return """
                     Can you generate a 200 pages training course book described as following: "%s".
-                    Give me the book plan in 8 chapters. Each chapter must contain 4 subchapters. Each subchapter must contain 4 sections.
+                    This book contains lessons to help AI teachers to teach things.
+                    The name for lessons is sections in the JSON.
+                    Give me the book plan in 8 chapters. Each chapter must contain 4 subchapters. Each subchapter must contain 4 lessons.
                     mainTitle represents the main book title in at most 10 words. Authors must be completed only if it is mentioned in the book description.
                     Do not include the chapter number neither the word \"chapter\" in chapter title. Do not include subchapter number neither the word \"subchapter\" in subchapter subtitle.
                     You have to answer only in parsable JSON format. Ensure that your answer is parsable in JSON. Answer in the language of the book description. 
@@ -191,9 +193,11 @@ public class CourseServiceImpl implements CourseService {
 
         static String chapter(String description, BookPlan.ChapterPlan ch) {
             return """
-                    Consider the training course book described as following: "%s". Each chapter has subchapters, and each subchapter has sections.
-                    each section must have title, firstParagraph, middleParagraph, endParagraph and sectionSummary attributes.
-                    Here is a chapter of the book containing subchapters and sections.
+                    Consider the training course book described as following: "%s". Each chapter has subchapters, and each subchapter has lessons.
+                    each lesson must have title, firstParagraph, middleParagraph, endParagraph and sectionSummary attributes.
+                    A lesson describes for AI teachers agent how to teach things.
+                    Here is a chapter of the book containing subchapters and lessons.
+                    The name for lessons is sections in the JSON.
                     You have to answer only in parsable JSON format. Ensure that your answer is parsable in JSON.
                     
                     %s
@@ -205,12 +209,75 @@ public class CourseServiceImpl implements CourseService {
 
         static String section(String description, String chapTitle, String subTitle, Section s) {
             return """
-                    You are writing a training course book described as the following "%s".
-                    Can you generate the content of the section \"%s\" from the subchapter \"%s\" of the chapter \"%s\" in at least 250 words and at most 400 words ?
+                    You are writing a lesson for a training course book described as the following "%s".
+                    Can you generate the content of the lesson \"%s\" from the subchapter \"%s\" of the chapter \"%s\" in at least 250 words and at most 400 words ?
                     This section is summarized as the following \"%s\" and starts like the following \"%s\" and continues like the following \"%s\" and ends like the following \"%s\".
                     Do not include the section title in the output.
                     Answer in the language of the book description.
                     Output must be plain text, not JSON.
+                    
+                    Here is an example of a lesson to teach english for french people:
+                    
+                    Tu es un professeur d'anglais bienveillant, francophone, qui enseigne à un débutant complet. \s
+                    Ta mission est de guider l'élève pendant environ **1 heure** dans un apprentissage structuré. \s
+                    Sois clair, lent, encourageant. Explique chaque notion avec simplicité. Utilise l’humour si cela détend l’ambiance.
+                    
+                    ---
+                    
+                    🧭 **Plan de la séance (~60 minutes)** :
+                    
+                    **Étape 1 – Accueil et mise en confiance (5 min)** \s
+                    - Dis bonjour à l’élève en français et explique que tu vas l’aider à apprendre l’anglais pas à pas. \s
+                    - Explique le plan du cours rapidement. \s
+                    - Encourage : “Tu vas voir, c’est simple et on va le faire ensemble !”
+                    
+                    **Étape 2 – Vocabulaire de base (10 min)** \s
+                    Enseigne ces phrases, une par une, en expliquant leur sens : \s
+                    - **Hello!** → Bonjour \s
+                    - **My name is Alice.** → Je m'appelle Alice \s
+                    - **What's your name?** → Comment tu t'appelles ? \s
+                    - **Nice to meet you!** → Enchanté \s
+                    - **How are you?** → Comment ça va ? \s
+                    - **I'm fine, thank you.** → Je vais bien, merci \s
+                    Demande à l’élève de répéter chaque phrase. Donne du feedback doux sur la prononciation.
+                    
+                    **Étape 3 – Dialogue guidé (15 min)** \s
+                    - Propose un dialogue simple. Parle en anglais, puis demande à l’élève de répondre. \s
+                    - Exemples :
+                      - Toi : Hello! My name is Jack. What’s your name? \s
+                      - Élève : My name is ... \s
+                      - Toi : Nice to meet you! \s
+                      - Élève : Nice to meet you too! \s
+                    - Si l’élève bloque, propose des réponses possibles et encourage-le.
+                    
+                    **Étape 4 – Jeux de rôles (10 min)** \s
+                    - Propose des situations :
+                      - "Tu rencontres quelqu’un à une fête. Que dis-tu ?"
+                      - "Quelqu’un te dit ‘How are you?’ Que réponds-tu ?"
+                    - Change les rôles : toi, l’élève, un ami imaginaire...
+                    
+                    **Étape 5 – Mini quiz et révision (10-15 min)** \s
+                    - Pose des questions comme :
+                      - "Comment dit-on ‘Je m’appelle Sophie’ ?" \s
+                      - "Que veut dire ‘Nice to meet you’ ?" \s
+                      - "Traduis : How are you?" \s
+                    - Corrige avec douceur et explique les erreurs.
+                    
+                    **Étape 6 – Clôture et encouragements (5 min)** \s
+                    - Résume les points appris. \s
+                    - Félicite sincèrement les efforts. \s
+                    - Propose de revoir la leçon ou de passer au module suivant la prochaine fois.
+                    
+                    ---
+                    
+                    🎓 **Conseils généraux** :
+                    - Sois patient et chaleureux.
+                    - Répète si besoin.
+                    - Explique chaque mot inconnu.
+                    - Utilise des smileys ou emojis dans le ton si tu veux détendre.
+                    - Ne survole pas. Tu dois tenir l'élève pendant 1h sans précipiter.
+                    
+                    Tu es un professeur humain, calme et toujours bienveillant.
                     """.formatted(description,
                     s.title(), subTitle, chapTitle,
                     s.sectionSummary(), s.firstParagraph(), s.middleParagraph(), s.endParagraph());
