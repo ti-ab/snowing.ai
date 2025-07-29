@@ -9,6 +9,8 @@ COPY . .
 ARG BUILD_PROFILE=prod
 ENV BUILD_PROFILE=$BUILD_PROFILE
 
+RUN sed -i 's/\r$//' mvnw
+
 RUN ./mvnw clean package -DskipTests -P${BUILD_PROFILE} && \
     cp target/*.jar app.jar
 
@@ -31,5 +33,8 @@ COPY . .
 
 # Port exposé par Spring Boot
 EXPOSE 8082
+
+
+RUN sed -i 's/\r$//' wait-for-postgres.sh
 
 CMD ["./wait-for-postgres.sh"]
