@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Room, RoomEvent } from 'livekit-client';
+import { Room, RoomEvent, DataPacket_Kind } from 'livekit-client';
 import { motion } from 'motion/react';
 import { RoomAudioRenderer, RoomContext, StartAudio } from '@livekit/components-react';
 import { toastAlert } from '@/components/alert-toast';
@@ -10,7 +10,6 @@ import { Toaster } from '@/components/ui/sonner';
 import { Welcome } from '@/components/welcome';
 import useConnectionDetails from '@/hooks/useConnectionDetails';
 import type { AppConfig } from '@/lib/types';
-
 const MotionWelcome = motion.create(Welcome);
 const MotionSessionView = motion.create(SessionView);
 
@@ -22,6 +21,9 @@ export function App({ appConfig }: AppProps) {
   const room = useMemo(() => new Room(), []);
   const [sessionStarted, setSessionStarted] = useState(false);
   const { connectionDetails, refreshConnectionDetails } = useConnectionDetails();
+
+  const [ctxKey, setCtxKey] = useState<'anglais'|'python'>('anglais');
+
 
   useEffect(() => {
     const onDisconnected = () => {
@@ -45,26 +47,33 @@ export function App({ appConfig }: AppProps) {
   useEffect(() => {
     let aborted = false;
     if (sessionStarted && room.state === 'disconnected' && connectionDetails) {
-      Promise.all([
-        room.localParticipant.setMicrophoneEnabled(true, undefined, {
-          preConnectBuffer: appConfig.isPreConnectBufferEnabled,
-        }),
-        room.connect(connectionDetails.serverUrl, connectionDetails.participantToken),
-      ]).catch((error) => {
-        if (aborted) {
-          // Once the effect has cleaned up after itself, drop any errors
-          //
-          // These errors are likely caused by this effect rerunning rapidly,
-          // resulting in a previous run `disconnect` running in parallel with
-          // a current run `connect`
-          return;
-        }
+      (async () => {
+          await Promise.all([
+            room.localParticipant.setMicrophoneEnabled(true, undefined, {
+              preConnectBuffer: appConfig.isPreConnectBufferEnabled,
+            }),
+            room.connect(connectionDetails.serverUrl, connectionDetails.participantToken),
+          ]).catch((error) => {
+            if (aborted) {
+              // Once the effect has cleaned up after itself, drop any errors
+              //
+              // These errors are likely caused by this effect rerunning rapidly,
+              // resulting in a previous run `disconnect` running in parallel with
+              // a current run `connect`
+              return;
+            }
 
-        toastAlert({
-          title: 'There was an error connecting to the agent',
-          description: `${error.name}: ${error.message}`,
-        });
-      });
+            toastAlert({
+              title: 'There was an error connecting to the agent',
+              description: `${error.name}: ${error.message}`,
+            });
+          });
+
+          await sleep(4000);
+
+          sendContext(ctxKey)
+        }
+      )()
     }
     return () => {
       aborted = true;
@@ -72,11 +81,23 @@ export function App({ appConfig }: AppProps) {
     };
   }, [room, sessionStarted, connectionDetails, appConfig.isPreConnectBufferEnabled]);
 
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  const sendContext = (key: string) => {
+    const payload = JSON.stringify({ type: 'setContext', context: key });
+    room.localParticipant.publishData(
+      new TextEncoder().encode(payload),
+      DataPacket_Kind.RELIABLE
+    );
+  };
+
   const { startButtonText } = appConfig;
 
   return (
     <>
-
 
 
       <MotionWelcome
@@ -88,6 +109,7 @@ export function App({ appConfig }: AppProps) {
         animate={{ opacity: sessionStarted ? 0 : 1 }}
         transition={{ duration: 0.5, ease: 'linear', delay: sessionStarted ? 0 : 0.5 }}
       />
+
 
       <RoomContext.Provider value={room}>
         <RoomAudioRenderer />
@@ -108,8 +130,15 @@ export function App({ appConfig }: AppProps) {
         />
       </RoomContext.Provider>
 
-
-
+      <select
+        value={ctxKey}
+        onChange={e => {
+          setCtxKey(e.target.value);
+        }}
+      >
+        <option value="anglais">Leçon d’anglais</option>
+        <option value="python">Leçon de Python</option>
+      </select>
 
       <Toaster />
     </>
