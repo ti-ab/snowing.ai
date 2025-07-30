@@ -14,10 +14,14 @@ import dotenv from 'dotenv';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
+import { RoomEvent, DataPacket_Kind, RemoteParticipant } from 'livekit-client';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const envPath = path.join(__dirname, '../.env.local');
-dotenv.config({ path: envPath });
+// Chargement des variables d'environnement
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, '../.env.local') });
+
+// Définition des prompts système existants
 
 const englishTeacherInstructions60Minutes = `
                                             Tu es un professeur d'anglais bienveillant, francophone, qui enseigne à un débutant complet.
@@ -83,49 +87,6 @@ const englishTeacherInstructions60Minutes = `
                                             Tu es un professeur humain, calme et toujours bienveillant.
                                             `;
 
-const englishTeacherInstructions = `
-    Tu es un professeur d'anglais bienveillant, parlant français, et spécialisé pour les débutants complets.
-    Tu parles lentement, simplement, et tu expliques chaque mot ou phrase si besoin.
-    Sois encourageant, motivant, et n’intimide jamais l’élève. Ton ton est humain et souriant.
-
-    Voici le contenu à enseigner aujourd'hui en une durée de 1 heure:
-
-    Titre : Se présenter en anglais (niveau A1)
-    Objectifs : Apprendre à dire son nom, poser des questions simples, comprendre les phrases de base
-
-    Cours :
-    En anglais, on se présente avec les phrases suivantes :
-    - **Hello!** → Bonjour
-    - **My name is Alice.** → Je m'appelle Alice
-    - **What's your name?** → Comment tu t'appelles ?
-    - **Nice to meet you!** → Enchanté
-    - **How are you?** → Comment ça va ?
-    - **I'm fine, thank you.** → Je vais bien, merci
-
-    Tu peux dire "I’m" à la place de "I am" — c’est plus naturel.
-
-    Exemples :
-    - Hello! My name is John.
-    - What's your name?
-    - I'm fine, and you?
-
-    Ta mission :
-    - Lis les phrases à voix haute (si audio activé)
-    - Demande à l’élève de répéter ou écrire
-    - Donne du feedback sur la prononciation et l’orthographe
-    - Pose des petites questions pour qu’il/elle participe
-    - Explique les mots nouveaux en français
-    - Félicite les efforts même s’il y a des erreurs
-    - Corrige en douceur si nécessaire
-
-    À la fin, fais un petit test oral :
-    > “Comment dis-tu ‘Je m’appelle Marie’ en anglais ?”
-    > “Comment demander le prénom de quelqu’un ?”
-
-    Si l'élève ne parle pas n'hésite pas à continuer de parler ou à lui poser des questions.
-    Ne passe pas à la leçon suivante tant que les bases ne sont pas acquises. Sois patient et chaleureux.
-    `;
-
 const pythonInstructions = `
                            Tu es un professeur de Python bienveillant, patient et pédagogique.
 
@@ -163,47 +124,63 @@ const pythonInstructions = `
                            N’avance pas au prochain module tant que celui-ci n’est pas bien compris. Sois interactif et humain dans ton approche.
                            `;
 
+// Map des contextes disponibles
+const contexts: Record<string, string> = {
+  anglais: englishTeacherInstructions60Minutes,
+  python: pythonInstructions,
+};
+let currentContextKey = 'anglais';
+
+// Définition de l'agent multimodal avec contexte dynamique
 export default defineAgent({
   entry: async (ctx: JobContext) => {
     await ctx.connect();
     console.log('waiting for participant');
     const participant = await ctx.waitForParticipant();
-    console.log(`starting assistant example agent for ${participant.identity}`);
+    console.log(`starting assistant agent for ${participant.identity}`);
 
-    // 1. Importez vos contextes (ou définissez-les inline)
-    const contexts: Record<string,string> = {
-      'anglais': englishTeacherInstructions60Minutes,
-      'python': pythonInstructions,
-      // ajoutez d’autres contextes si besoin
-    };
 
-    // Contexte par défaut
-    let currentContextKey = 'anglais';
 
-    // 2. Après la connexion, abonnez‑vous au canal de données (DataChannel)
-    ctx.onData(async (data) => {
-      try {
-        const msg = JSON.parse(Buffer.from(data.body).toString());
-        if (msg.type === 'setContext' && contexts[msg.context]) {
-          console.log(`Changement de contexte vers : ${msg.context}`);
-          currentContextKey = msg.context;
+    // Écoute des messages de changement de contexte depuis le front-end
+    ctx.room.on(
+      RoomEvent.DataReceived,
+      (payload, participant, kind, topic) => {
+        // Vérifie que le paquet est fiable
+        //@ts-ignore
+        if (kind != undefined && kind === DataPacket_Kind.RELIABLE) {
+          try {
+            const msg = JSON.parse(new TextDecoder().decode(payload));
+            if (msg.type === 'setContext' && contexts[msg.context]) {
+              currentContextKey = msg.context;
+              console.log(`Contexte changé → ${msg.context}`);
+              // Si session active, injecter un message SYSTEM avec les nouvelles instructions
+              if (session) {
+                session.conversation.item.create(
+                  llm.ChatMessage.create({
+                    role: llm.ChatRole.SYSTEM,
+                    text: contexts[currentContextKey],
+                  })
+                );
+
+                // Demander une réponse immédiate de l'agent
+                session.response.create();
+              }
+            }
+          } catch {
+            // Ignorer les payloads invalides
+          }
         }
-      } catch (e) {
-        console.warn('Impossible de parser le message de context:', e);
       }
-    });
+    );
 
-
-
-    // 3. Utilisation du contexte dynamique
-    const instructions = contexts[currentContextKey];
-
-    const model = new openai.realtime.RealtimeModel({
+    // Création du modèle OpenAI avec le prompt système selon le contexte sélectionné
+    let model = new openai.realtime.RealtimeModel({
       model: 'gpt-4o-mini-realtime-preview',
-      instructions,             // <-- ici on injecte le prompt système dynamique
+      instructions: contexts[currentContextKey],
     });
 
 
+    // Définition des fonctions LLM (météo)
     const fncCtx: llm.FunctionContext = {
       weather: {
         description: 'Get the weather in a location',
@@ -221,18 +198,26 @@ export default defineAgent({
         },
       },
     };
+
+    // Instanciation et démarrage de l'agent multimodal
     const agent = new multimodal.MultimodalAgent({ model, fncCtx });
     const session = await agent
       .start(ctx.room, participant)
       .then((session) => session as openai.realtime.RealtimeSession);
 
-    session.conversation.item.create(llm.ChatMessage.create({
-      role: llm.ChatRole.ASSISTANT,
-      text: 'Bonjour commençons notre leçon !',
-    }));
+    // Message initial de l'assistant
+    session.conversation.item.create(
+      llm.ChatMessage.create({
+        role: llm.ChatRole.ASSISTANT,
+        text: 'Bonjour, commençons notre leçon !',
+      })
+    );
 
     session.response.create();
   },
 });
 
-cli.runApp(new WorkerOptions({ agent: fileURLToPath(import.meta.url) }));
+// Démarrage du worker via le CLI LiveKit
+cli.runApp(
+  new WorkerOptions({ agent: fileURLToPath(import.meta.url) })
+);

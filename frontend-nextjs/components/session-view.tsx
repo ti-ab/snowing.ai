@@ -17,6 +17,7 @@ import useChatAndTranscription from '@/hooks/useChatAndTranscription';
 import { useDebugMode } from '@/hooks/useDebug';
 import type { AppConfig } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import ContextSelector from '@/components/context-selector';
 
 function isAgentAvailable(agentState: AgentState) {
   return agentState == 'listening' || agentState == 'thinking' || agentState == 'speaking';
@@ -96,6 +97,7 @@ export const SessionView = ({
         cn(!chatOpen && 'max-h-svh overflow-hidden')
       }
     >
+
       <ChatMessageView
         className={cn(
           'mx-auto min-h-svh w-full max-w-2xl px-3 pt-32 pb-40 transition-[opacity,translate] duration-300 ease-out md:px-0 md:pt-36 md:pb-48',
@@ -127,6 +129,10 @@ export const SessionView = ({
       <MediaTiles chatOpen={chatOpen} />
 
       <div className="bg-background fixed right-0 bottom-0 left-0 z-50 px-3 pt-2 pb-3 md:px-12 md:pb-12">
+
+        <ContextSelector room={room}/>
+
+
         <motion.div
           key="control-bar"
           initial={{ opacity: 0, translateY: '100%' }}

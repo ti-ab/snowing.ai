@@ -23,8 +23,11 @@ WORKDIR /app
 # Installe le client PostgreSQL
 RUN apt-get update && apt-get install -y postgresql-client && apt-get clean
 
+
+
 # Copie le script de démarrage intelligent
 COPY wait-for-postgres.sh .
+RUN sed -i 's/\r$//' wait-for-postgres.sh
 RUN chmod +x wait-for-postgres.sh
 
 # Copie les sources et/ou jar
@@ -35,6 +38,5 @@ COPY . .
 EXPOSE 8082
 
 
-RUN sed -i 's/\r$//' wait-for-postgres.sh
 
 CMD ["./wait-for-postgres.sh"]

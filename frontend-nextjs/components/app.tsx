@@ -10,7 +10,6 @@ import { Toaster } from '@/components/ui/sonner';
 import { Welcome } from '@/components/welcome';
 import useConnectionDetails from '@/hooks/useConnectionDetails';
 import type { AppConfig } from '@/lib/types';
-import ContextSelector from '@/components/context-selector';
 
 const MotionWelcome = motion.create(Welcome);
 const MotionSessionView = motion.create(SessionView);
@@ -77,6 +76,9 @@ export function App({ appConfig }: AppProps) {
 
   return (
     <>
+
+
+
       <MotionWelcome
         key="welcome"
         startButtonText={startButtonText}
@@ -86,8 +88,6 @@ export function App({ appConfig }: AppProps) {
         animate={{ opacity: sessionStarted ? 0 : 1 }}
         transition={{ duration: 0.5, ease: 'linear', delay: sessionStarted ? 0 : 0.5 }}
       />
-
-      <ContextSelector room={room}/>
 
       <RoomContext.Provider value={room}>
         <RoomAudioRenderer />
@@ -107,6 +107,9 @@ export function App({ appConfig }: AppProps) {
           }}
         />
       </RoomContext.Provider>
+
+
+
 
       <Toaster />
     </>
