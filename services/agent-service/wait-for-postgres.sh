@@ -4,7 +4,7 @@ set -e
 
 DB_HOST="agent-db"
 DB_PORT="5432"
-DB_USER="user"
+DB_USER="agent"
 SPRING_PROFILE="${SPRING_PROFILES_ACTIVE:-default}"
 
 echo "⏳ Attente de PostgreSQL sur $DB_HOST:$DB_PORT..."
