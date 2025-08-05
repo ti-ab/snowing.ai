@@ -10,6 +10,8 @@ services:
       POSTGRES_PASSWORD: password
     ports:
       - "5433:5432"
+    networks:
+      - backend-network
 
   user-service:
     container_name: user-service
@@ -22,6 +24,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=password
     depends_on:
       - user-db
+    networks:
+      - backend-network
 
   agent-db:
     image: postgres:15
@@ -32,6 +36,8 @@ services:
       POSTGRES_PASSWORD: password
     ports:
       - "5434:5432"
+    networks:
+      - backend-network
 
   agent-service:
     container_name: agent-service
@@ -44,6 +50,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=password
     depends_on:
       - agent-db
+    networks:
+      - backend-network
 
   course-db:
     image: postgres:15
@@ -56,6 +64,8 @@ services:
       - "5435:5432"
     volumes:
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - backend-network
 
   course-service:
     container_name: course-service
@@ -68,13 +78,18 @@ services:
       - SPRING_DATASOURCE_PASSWORD=password
     depends_on:
       - course-db
+    networks:
+      - backend-network
 
   audio-service:
     build: ./services/audio-service
     ports:
       - "8083:8083"
+    networks:
+      - backend-network
 
   frontend-nextjs:
+    container_name: frontend-nextjs
     build: ./frontend-nextjs
     ports:
       - "3000:3000"
@@ -92,6 +107,8 @@ services:
       context: ./services/multimodal-agent-node
     ports:
       - "8084:8084"
+    networks:
+      - backend-network
 
   nginx:
     image: nginx:latest
@@ -105,6 +122,10 @@ services:
       - user-service
       - agent-service
       - audio-service
+    networks:
+      - keycloak-network
+      - frontend-network
+      - backend-network
 
   keycloak_web:
       image: quay.io/keycloak/keycloak:26.3.2
@@ -154,3 +175,4 @@ volumes:
 networks:
   frontend-network:
   keycloak-network:
+  backend-network:
