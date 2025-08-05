@@ -20,8 +20,16 @@ export const authOptions: AuthOptions = {
       userinfo: `${process.env.NEXT_CONTAINER_KEYCLOAK_ENDPOINT}/realms/${process.env.NEXT_PUBLIC_KEYCLOAK_REALM}/protocol/openid-connect/userinfo`,
     }),
   ],
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+  },
   callbacks: {
+    async session({ session, token }) {
+      if (session.user && token.id) {
+        (session.user as any).id = token.id;
+      }
+      return session;
+    },
     async jwt({ token, account }) {
       // On garde l’id_token pour l’envoyer à la déconnexion
       if (account?.id_token) token.id_token = account.id_token;

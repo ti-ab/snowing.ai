@@ -1,5 +1,9 @@
 import { headers } from 'next/headers';
 import { getAppConfig } from '@/lib/utils';
+import { getServerSession } from "next-auth/next";
+import { useSession } from "next-auth/react"
+import {authOptions} from "../api/auth/[...nextauth]/route"
+import Link from 'next/link'
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -8,6 +12,9 @@ interface AppLayoutProps {
 export default async function AppLayout({ children }: AppLayoutProps) {
   const hdrs = await headers();
   const { companyName, logo, logoDark } = await getAppConfig(hdrs);
+
+
+  const session = await getServerSession(authOptions);
 
   return (
     <>
@@ -25,17 +32,11 @@ export default async function AppLayout({ children }: AppLayoutProps) {
             className="hidden size-6 dark:block"
           />
         </a>
-        <span className="text-foreground font-mono text-xs font-bold tracking-wider uppercase">
-          Built with{' '}
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://docs.livekit.io/agents"
-            className="underline underline-offset-4"
-          >
-            LiveKit Agents
-          </a>
-        </span>
+          <Link href="/sign">
+            <span className="text-foreground font-mono text-xs font-bold tracking-wider uppercase">
+              {session?.user?.email ? `ID: ${session.user.email}`:"Sign in"}
+            </span>
+          </Link>
       </header>
       {children}
     </>

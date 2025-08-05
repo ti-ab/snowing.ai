@@ -13,6 +13,7 @@ import type { AppConfig } from '@/lib/types';
 const MotionWelcome = motion.create(Welcome);
 const MotionSessionView = motion.create(SessionView);
 
+
 interface AppProps {
   appConfig: AppConfig;
 }
@@ -23,6 +24,8 @@ export function App({ appConfig }: AppProps) {
   const { connectionDetails, refreshConnectionDetails } = useConnectionDetails();
 
   const [ctxKey, setCtxKey] = useState<'anglais'|'python'>('anglais');
+
+
 
 
   useEffect(() => {
