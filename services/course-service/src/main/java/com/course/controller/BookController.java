@@ -1,7 +1,6 @@
 package com.course.controller;
 
-import com.course.model.Book;
-import com.course.repository.BookRepository;
+import com.course.dto.BookDTO;
 import com.course.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,8 +15,8 @@ public class BookController {
     BookService bookService;
 
     @GetMapping("/api/books")
-    public List<Book> list() {
-        return bookService.fullTree();   // ← entités, pas de DTO
+    public List<BookDTO> list() {
+        return bookService.fullTreeNotSimultaneous();   // ← entités, pas de DTO
     }
 }
 
