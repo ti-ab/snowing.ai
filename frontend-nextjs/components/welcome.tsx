@@ -12,6 +12,7 @@ export const Welcome = ({
   onStartCall,
   ref,
 }: React.ComponentProps<'div'> & WelcomeProps) => {
+
   return (
     <div
       ref={ref}

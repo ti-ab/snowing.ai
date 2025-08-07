@@ -26,8 +26,6 @@ export function App({ appConfig }: AppProps) {
   const [ctxKey, setCtxKey] = useState<'anglais'|'python'>('anglais');
 
 
-
-
   useEffect(() => {
     const onDisconnected = () => {
       setSessionStarted(false);
