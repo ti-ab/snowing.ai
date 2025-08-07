@@ -61,4 +61,11 @@ public class Chapter {
         }
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public Book getBook() {
+        return book;
+    }
 }

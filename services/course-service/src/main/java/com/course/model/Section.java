@@ -35,4 +35,36 @@ public class Section {
     public void setIdx(int idx) {
         this.idx = idx;
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getSectionSummary() {
+        return sectionSummary;
+    }
+
+    public String getFirstParagraph() {
+        return firstParagraph;
+    }
+
+    public String getMiddleParagraph() {
+        return middleParagraph;
+    }
+
+    public String getEndParagraph() {
+        return endParagraph;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public Subchapter getSubchapter() {
+        return subchapter;
+    }
 }

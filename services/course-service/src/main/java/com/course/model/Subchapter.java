@@ -44,5 +44,15 @@ public class Subchapter {
         }
     }
 
+    public Long getId() {
+        return id;
+    }
 
+    public Chapter getChapter() {
+        return chapter;
+    }
+
+    public String getTitle() {
+        return title;
+    }
 }

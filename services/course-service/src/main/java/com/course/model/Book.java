@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "books", schema = "courses")
@@ -25,4 +26,24 @@ public class Book {
 
     public void addChapter(Chapter c) { c.setBook(this); chapters.add(c); }
     public void setCreatedAt(LocalDateTime at) { this.createdAt = at; }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getAuthors() {
+        return authors;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public List<Chapter> getChapters() {
+        return chapters;
+    }
 }
