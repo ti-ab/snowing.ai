@@ -10,6 +10,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { Welcome } from '@/components/welcome';
 import useConnectionDetails from '@/hooks/useConnectionDetails';
 import type { AppConfig } from '@/lib/types';
+
 const MotionWelcome = motion.create(Welcome);
 const MotionSessionView = motion.create(SessionView);
 
@@ -23,7 +24,24 @@ export function App({ appConfig }: AppProps) {
   const [sessionStarted, setSessionStarted] = useState(false);
   const { connectionDetails, refreshConnectionDetails } = useConnectionDetails();
 
-  const [ctxKey, setCtxKey] = useState<'anglais'|'python'>('anglais');
+  const [books, setBooks] = useState([]);
+
+  const [ctxKey, setCtxKey] = useState<'anglais' | 'python'>('anglais');
+
+  // Exemple d’appel client-side, dans un useEffect par exemple
+  useEffect(() => {
+    fetch('/api/courses')
+      .then((res) => res.json())
+      .then((data) => {
+        setBooks(data);
+        window.scrollTo(0, 0);
+      })
+      .catch((err) => {
+        setBooks([]);
+      });
+
+    setTimeout(() => window.scrollTo(0, 0), 500);
+  }, []);
 
 
   useEffect(() => {
@@ -72,9 +90,9 @@ export function App({ appConfig }: AppProps) {
 
           await sleep(4000);
 
-          sendContext(ctxKey)
+          sendContext(ctxKey);
         }
-      )()
+      )();
     }
     return () => {
       aborted = true;
@@ -91,7 +109,7 @@ export function App({ appConfig }: AppProps) {
     const payload = JSON.stringify({ type: 'setContext', context: key });
     room.localParticipant.publishData(
       new TextEncoder().encode(payload),
-      DataPacket_Kind.RELIABLE
+      DataPacket_Kind.RELIABLE,
     );
   };
 
@@ -104,6 +122,7 @@ export function App({ appConfig }: AppProps) {
       <MotionWelcome
         key="welcome"
         startButtonText={startButtonText}
+        books={books}
         onStartCall={() => setSessionStarted(true)}
         disabled={sessionStarted}
         initial={{ opacity: 0 }}

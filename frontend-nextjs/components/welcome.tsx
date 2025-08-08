@@ -7,17 +7,18 @@ interface WelcomeProps {
 }
 
 export const Welcome = ({
-  disabled,
-  startButtonText,
-  onStartCall,
-  ref,
-}: React.ComponentProps<'div'> & WelcomeProps) => {
+                          disabled,
+                          startButtonText,
+                          onStartCall,
+                          books,
+                          ref,
+                        }: React.ComponentProps<'div'> & WelcomeProps) => {
 
   return (
     <div
       ref={ref}
       inert={disabled}
-      className="fixed inset-0 z-10 mx-auto flex h-svh flex-col items-center justify-center text-center"
+      className="z-10 mx-auto h-screen flex flex-col items-center"
     >
       <svg
         width="64"
@@ -39,18 +40,15 @@ export const Welcome = ({
       <Button variant="primary" size="lg" onClick={onStartCall} className="mt-6 w-64 font-mono">
         {startButtonText}
       </Button>
-      <p className="text-fg1 m fixed bottom-5 left-1/2 w-full max-w-prose -translate-x-1/2 pt-1 text-xs leading-5 font-normal text-pretty md:text-sm">
-        Need help getting set up? Check out the{' '}
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://docs.livekit.io/agents/start/voice-ai/"
-          className="underline"
-        >
-          Voice AI quickstart
-        </a>
-        .
-      </p>
+      {!!books?.length ? <div>
+        {books.map((book: any, index: number) => <div key={index}>
+          <h2><b>{index+1}. {book.title}</b></h2>{book.chapters?.map((chapter: any, chapterIndex: number) => <div key={chapterIndex}><h3><b>{index+1}.{chapterIndex+1}. {chapter.title}</b></h3>{chapter.subchapters?.map((subchapter: any, subchapterIndex: number) =>
+          <div key={subchapterIndex}><h4><b>{index+1}.{chapterIndex+1}.{subchapterIndex+1}. {subchapter.title}</b></h4>{subchapter.sections?.map((section: any, sectionIndex: number) =>
+            <div key={sectionIndex}>
+              <div><h5>- {sectionIndex+1}. {section.title}</h5></div>
+            </div>)}</div>)}</div>)}
+        </div>)}
+      </div> : <div>Loading courses...</div>}
     </div>
   );
 };
