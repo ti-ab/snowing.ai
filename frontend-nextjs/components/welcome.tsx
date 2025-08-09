@@ -12,6 +12,7 @@ export const Welcome = ({
                           onStartCall,
                           books,
                           ref,
+                          router
                         }: React.ComponentProps<'div'> & WelcomeProps) => {
 
   return (
@@ -42,7 +43,7 @@ export const Welcome = ({
       </Button>
       {!!books?.length ? <div>
         {books.map((book: any, index: number) => <div key={index}>
-          <h2><b>{index+1}. {book.title}</b></h2>{book.chapters?.map((chapter: any, chapterIndex: number) => <div key={chapterIndex}><h3><b>{index+1}.{chapterIndex+1}. {chapter.title}</b></h3>{chapter.subchapters?.map((subchapter: any, subchapterIndex: number) =>
+          <h2 className={"cursor-pointer text-blue-600 underline"} onClick={() => router.push(`/courses/${book.id}`)}><b>{index+1}. {book.title}</b></h2>{book.chapters?.map((chapter: any, chapterIndex: number) => <div key={chapterIndex}><h3><b>{index+1}.{chapterIndex+1}. {chapter.title}</b></h3>{chapter.subchapters?.map((subchapter: any, subchapterIndex: number) =>
           <div key={subchapterIndex}><h4><b>{index+1}.{chapterIndex+1}.{subchapterIndex+1}. {subchapter.title}</b></h4>{subchapter.sections?.map((section: any, sectionIndex: number) =>
             <div key={sectionIndex}>
               <div><h5>- {sectionIndex+1}. {section.title}</h5></div>

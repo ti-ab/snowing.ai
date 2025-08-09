@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -72,6 +73,70 @@ public class BookServiceImpl implements BookService {
         )).toList();
     }
 
+
+
+
+    public BookDTO fullTreeById(Long id) {
+
+        // 1) première requête : uniquement les books
+        Optional<Book> bookOptional = bookRepository.findById(id);          // SELECT * FROM books
+
+        if (bookOptional.isPresent()) {
+
+            Book book = bookOptional.get();
+
+            // 2-3-4) on initialise chaque niveau paresseux en blocs
+            Hibernate.initialize(book.getChapters());                  // req. chapters
+            book.getChapters().forEach(c -> {
+                Hibernate.initialize(c.getSubchapters());           // req. subchapters
+                c.getSubchapters().forEach(sc ->
+                        Hibernate.initialize(sc.getSections()));        // req. sections
+            });
+
+            // 5) mapping manuel vers les DTO (Solution A)
+            return new BookDTO(
+                    book.getId(),
+                    book.getTitle(),
+                    book.getAuthors(),
+                    book.getChapters().stream().map(c -> new ChapterDTO(
+                            c.getId(), c.getIdx(), c.getTitle(),
+                            c.getSubchapters().stream().map(sc -> new SubchapterDTO(
+                                    sc.getId(), sc.getIdx(), sc.getTitle(),
+                                    sc.getSections().stream()
+                                            .map(s -> new SectionDTO(
+                                                    s.getId(), s.getIdx(),
+                                                    s.getTitle(), s.getContent()))
+                                            .toList()
+                            )).toList()
+                    )).toList()
+            );
+
+        } else {
+
+            return null;
+
+        }
+    }
+
+    @Override
+    public List<BookDTO> listBooksOnly() {
+
+
+        // 1) première requête : uniquement les books
+        List<Book> books = bookRepository.findAll();          // SELECT * FROM books
+
+        // 5) mapping manuel vers les DTO (Solution A)
+        return books.stream().map(b -> new BookDTO(
+                b.getId(),
+                b.getTitle(),
+                b.getAuthors(),
+                b.getChapters().stream().map(c -> new ChapterDTO(
+                        c.getId(), c.getIdx(), c.getTitle(),
+                        null
+                )).toList()
+        )).toList();
+
+    }
 
 
 }

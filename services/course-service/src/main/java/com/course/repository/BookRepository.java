@@ -14,12 +14,13 @@ import java.util.List;
 public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Query("""
-         select distinct b
-         from Book b
-           left join fetch b.chapters c
-           left join fetch c.subchapters s
-           left join fetch s.sections
-         """)
+            select distinct b
+            from Book b
+              left join fetch b.chapters c
+              left join fetch c.subchapters s
+              left join fetch s.sections
+            """)
     List<Book> findAllWithTree();
+
 
 }

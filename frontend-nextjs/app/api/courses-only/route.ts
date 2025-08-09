@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { AccessToken, type AccessTokenOptions, type VideoGrant } from 'livekit-server-sdk';
 
 // NOTE: you are expected to define the following environment variables in `.env.local`:
@@ -16,17 +16,9 @@ export type ConnectionDetails = {
   participantToken: string;
 };
 
-export async function GET(_req: Request, ctx: { params: { id: string } }) {
+export async function GET() {
 
-    const { id } = ctx.params;
-
-    let response;
-
-    if (!!id) {
-        response = await fetch(`http://nginx/api/books/${id}`);
-    } else {
-        response = await fetch("http://nginx/api/books");
-    }
+    const response = await fetch("http://nginx/api/booksOnly");
 
     const jsonResponse = await response.json();
 
@@ -35,4 +27,3 @@ export async function GET(_req: Request, ctx: { params: { id: string } }) {
     });
     return NextResponse.json(jsonResponse, { headers });
 }
-

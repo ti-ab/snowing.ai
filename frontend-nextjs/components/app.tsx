@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Room, RoomEvent, DataPacket_Kind } from 'livekit-client';
 import { motion } from 'motion/react';
 import { RoomAudioRenderer, RoomContext, StartAudio } from '@livekit/components-react';
@@ -28,9 +29,11 @@ export function App({ appConfig }: AppProps) {
 
   const [ctxKey, setCtxKey] = useState<'anglais' | 'python'>('anglais');
 
+  const router = useRouter();
+
   // Exemple d’appel client-side, dans un useEffect par exemple
   useEffect(() => {
-    fetch('/api/courses')
+    fetch('/api/courses-only')
       .then((res) => res.json())
       .then((data) => {
         setBooks(data);
@@ -128,6 +131,7 @@ export function App({ appConfig }: AppProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: sessionStarted ? 0 : 1 }}
         transition={{ duration: 0.5, ease: 'linear', delay: sessionStarted ? 0 : 0.5 }}
+        router={router}
       />
 
 
