@@ -134,36 +134,6 @@ export function App({ appConfig }: AppProps) {
         router={router}
       />
 
-
-      <RoomContext.Provider value={room}>
-        <RoomAudioRenderer />
-        <StartAudio label="Start Audio" />
-        {/* --- */}
-        <MotionSessionView
-          key="session-view"
-          appConfig={appConfig}
-          disabled={!sessionStarted}
-          sessionStarted={sessionStarted}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: sessionStarted ? 1 : 0 }}
-          transition={{
-            duration: 0.5,
-            ease: 'linear',
-            delay: sessionStarted ? 0.5 : 0,
-          }}
-        />
-      </RoomContext.Provider>
-
-      <select
-        value={ctxKey}
-        onChange={e => {
-          setCtxKey(e.target.value);
-        }}
-      >
-        <option value="anglais">Leçon d’anglais</option>
-        <option value="python">Leçon de Python</option>
-      </select>
-
       <Toaster />
     </>
   );
