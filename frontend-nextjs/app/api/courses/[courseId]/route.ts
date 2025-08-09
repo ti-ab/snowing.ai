@@ -1,10 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { AccessToken, type AccessTokenOptions, type VideoGrant } from 'livekit-server-sdk';
+import {NextResponse, NextRequest} from 'next/server';
+import {getServerSession} from "next-auth/next";
+import {authOptions} from "../../auth/[...nextauth]/route";
+import { getToken } from "next-auth/jwt";
 
-// NOTE: you are expected to define the following environment variables in `.env.local`:
-const API_KEY = process.env.LIVEKIT_API_KEY;
-const API_SECRET = process.env.LIVEKIT_API_SECRET;
-const LIVEKIT_URL = process.env.LIVEKIT_URL;
 
 // don't cache the results
 export const revalidate = 0;
@@ -16,23 +14,42 @@ export type ConnectionDetails = {
   participantToken: string;
 };
 
-export async function GET(_req: Request, ctx: { params: { courseId: string } }) {
+export async function GET(
+    _req: NextRequest,
+    { params }: { params: { courseId: string } }
+) {
+    const session = await getServerSession(authOptions);
 
-    const { courseId } = ctx.params;
-
-    let response;
-
-    if (!!courseId) {
-        response = await fetch(`http://nginx/api/books/${courseId}`);
-    } else {
-        response = await fetch("http://nginx/api/books");
+    if (!session) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const jsonResponse = await response.json();
+    // Si ton backend nécessite le token Keycloak, on le récupère et on le propage
+    const token = await getToken({ req: _req }); // nécessite NEXTAUTH_SECRET
+    const headers: HeadersInit = {
+        "Cache-Control": "no-store",
+        ...(token ? { Authorization: `Bearer ${token.accessToken ?? token}` } : {}),
+    };
 
-    const headers = new Headers({
-      'Cache-Control': 'no-store',
-    });
-    return NextResponse.json(jsonResponse, { headers });
+    try {
+        const upstream = await fetch(`http://nginx/api/books/${params.courseId}`, {
+            headers,
+            cache: "no-store",
+        });
+
+        if (!upstream.ok) {
+            return NextResponse.json(
+                { error: "Upstream error", status: upstream.status },
+                { status: 502 }
+            );
+        }
+
+        const data = await upstream.json();
+        return NextResponse.json(data, { headers: { "Cache-Control": "no-store" } });
+    } catch (err) {
+        return NextResponse.json(
+            { error: "Fetch failed", details: (err as Error).message },
+            { status: 500 }
+        );
+    }
 }
-

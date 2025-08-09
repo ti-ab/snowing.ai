@@ -40,7 +40,7 @@ export const Course = ({
             <Button variant="primary" size="lg" onClick={onStartCall} className="mt-6 w-64 font-mono">
                 {startButtonText}
             </Button>
-            {!!course ? (
+            {!!course?.title ? (
                 <div>
                     <h2>
                         <b>1. {course.title}</b>

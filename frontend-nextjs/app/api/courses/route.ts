@@ -16,17 +16,11 @@ export type ConnectionDetails = {
   participantToken: string;
 };
 
-export async function GET(_req: Request, ctx: { params: { id: string } }) {
+export async function GET() {
 
-    const { id } = ctx.params;
 
-    let response;
+    const response = await fetch("http://nginx/api/books");
 
-    if (!!id) {
-        response = await fetch(`http://nginx/api/books/${id}`);
-    } else {
-        response = await fetch("http://nginx/api/books");
-    }
 
     const jsonResponse = await response.json();
 
